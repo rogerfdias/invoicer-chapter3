@@ -35,6 +35,9 @@ type invoicer struct {
 	store *gormstore.Store
 }
 
+const defaultUser string = "samantha"
+const defaultPass string = "1ns3cur3"
+
 func main() {
 	var (
 		iv  invoicer
@@ -206,9 +209,35 @@ func (iv *invoicer) deleteInvoice(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(fmt.Sprintf("deleted invoice %d", i1.ID)))
 }
 
+func requestBasicAuth(w http.ResponseWriter) {
+        w.Header().Set("WWW-Authenticate", `Basic realm="invoicer"`)
+        w.WriteHeader(401)
+        w.Write([]byte(`please authenticate`))
+}
+
+
 func (iv *invoicer) getIndex(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Security-Policy", "default-src 'self'; child-src 'self;")
 	w.Header().Add("X-Frame-Options", "SAMEORIGIN")
+        if len(r.Header.Get("Authorization")) < 8 ||
+        r.Header.Get("Authorization")[0:5] != `Basic` {
+ 	requestBasicAuth(w)    
+        return
+    	}
+
+    	authbytes, err := base64.StdEncoding.DecodeString(
+        r.Header.Get("Authorization")[6:])
+    	if err != nil {
+ 	requestBasicAuth(w)    
+        return
+    	}
+ 	authstr := fmt.Sprintf("%s", authbytes)    
+ 	username := authstr[0:strings.Index(authstr, ":")]    
+ 	password := authstr[strings.Index(authstr, ":")+1:]    
+    	if username != defaultUser && password != defaultPass {
+ 	requestBasicAuth(w)    
+        return
+    }
 	w.Write([]byte(`
 <!DOCTYPE html>
 <html>
