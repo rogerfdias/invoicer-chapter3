@@ -8,7 +8,7 @@ scripts discussed in chapter 2 to the basic setup of the invoicer application an
 infrastructure, plus the improvements implemented in chapter 3.
 
 Get your own copy
--------------------------
+--------------------------
 
 To try out the code in this repository, first create a fork in your own github
 account. Now before you do anything, edit the file in `.circleci/config.yml` and
